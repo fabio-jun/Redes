@@ -8,7 +8,7 @@ def receive_messages(client_socket):
     Args:
         client_socket (socket.socket): O socket do cliente.
 
-    Essa função roda em um trread separado, a fim de receber e printar continuamente as mensagens recebidas a partir do servidor
+    Essa função roda em um thread separado, a fim de receber e printar continuamente as mensagens recebidas a partir do servidor
     """
     while True:
         try:
