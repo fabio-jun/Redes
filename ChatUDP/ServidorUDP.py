@@ -1,7 +1,7 @@
 import socket
 import threading
 
-SERVER_IP = '192.168.0.211'  # IP do servidor
+SERVER_IP = '192.168.0.120'  # IP do servidor
 SERVER_PORT = 12345  # Porta do servidor
 BUFFER_SIZE = 1500  # Tamanho limite do buffer de pacote
 
