@@ -17,8 +17,8 @@ def format_all_speeds(bps):
     )
 
 def generate_test_string():
-    # Gerar string de 500 bytes contendo "teste de rede 2024"
-    base_string = "teste de rede 2024"
+    # Gerar string de 500 bytes contendo "teste de rede *2024*"
+    base_string = "teste de rede *2024*"
     repeated_string = (base_string * (500 // len(base_string)))[:500]
     return repeated_string.encode('utf-8')  # Converter para bytes
 
@@ -106,5 +106,5 @@ def start_udp_client():
         # Aguardar antes de realizar nova transferência
         input("Pressione Enter para realizar uma nova transferência...")
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     start_udp_client()
