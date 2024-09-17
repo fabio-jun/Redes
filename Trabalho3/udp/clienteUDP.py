@@ -17,8 +17,8 @@ def format_all_speeds(bps):
     )
 
 def generate_test_string():
-    # Gerar string de 500 bytes contendo "teste de rede *2024*"
-    base_string = "teste de rede *2024*"
+    # Gerar string de 500 bytes contendo "teste de rede 2024"
+    base_string = "teste de rede 2024"
     repeated_string = (base_string * (500 // len(base_string)))[:500]
     return repeated_string.encode('utf-8')  # Converter para bytes
 
@@ -49,6 +49,10 @@ def start_udp_client():
         print(f"Pacotes enviados: {total_packets_sent:,}")
         print(f"Bytes enviados: {total_bytes_sent:,} bytes\n")
 
+        # Enviar o total de pacotes enviados para o servidor
+        total_packets_sent_message = str(total_packets_sent).encode('utf-8')
+        s.sendto(total_packets_sent_message, (HOST, PORT))
+
         # Enviar uma notificação ao servidor indicando que o upload terminou
         s.sendto(b'UPLOAD_COMPLETE', (HOST, PORT))
 
@@ -56,8 +60,9 @@ def start_udp_client():
         total_bytes_received = 0
         total_packets_received = 0
         start_time = time.time()
-        
-        while time.time() - start_time < 20:  # Receber pacotes por 20 segundos
+
+        # Receber pacotes de dados por 20 segundos
+        while time.time() - start_time < 20:
             try:
                 s.settimeout(5)  # Timeout de 5 segundos para dar mais tempo ao cliente
                 data, _ = s.recvfrom(packet_size)
@@ -65,6 +70,20 @@ def start_udp_client():
                 total_packets_received += 1
             except socket.timeout:
                 break  # Se não houver mais pacotes, interrompe o loop
+
+        # Agora, esperar pela mensagem "END_OF_DATA" para saber que os pacotes de dados terminaram
+        while True:
+            data, _ = s.recvfrom(1024)
+            if data == b'END_OF_DATA':
+                break
+
+        # Receber o número total de pacotes enviados pelo servidor
+        total_packets_sent_by_server = 0
+        try:
+            data, _ = s.recvfrom(1024)  # Receber o número de pacotes enviados pelo servidor
+            total_packets_sent_by_server = int(data.decode('utf-8'))
+        except socket.timeout:
+            print("Erro ao receber o número de pacotes enviados pelo servidor.")
 
         end_time = time.time()
 
@@ -75,14 +94,17 @@ def start_udp_client():
         print(f"Taxa de Download:\n{format_all_speeds(download_bps)}")
         print(f"Pacotes por segundo: {download_pps:,.2f}")
         print(f"Pacotes recebidos: {total_packets_received:,}")
-        print(f"Bytes recebidos: {total_bytes_received:,} bytes\n")
+        print(f"Bytes recebidos: {total_bytes_received:,} bytes")
 
         # Calcular pacotes perdidos durante o download
-        lost_packets_download = total_packets_sent - total_packets_received
-        print(f"Pacotes perdidos no download: {lost_packets_download}\n")
+        if total_packets_sent_by_server > 0:
+            lost_packets_download = total_packets_sent_by_server - total_packets_received
+            print(f"Pacotes perdidos no download: {lost_packets_download}\n")
+        else:
+            print("Não foi possível calcular os pacotes perdidos, pois o número de pacotes enviados pelo servidor não foi recebido.")
 
         # Aguardar antes de realizar nova transferência
         input("Pressione Enter para realizar uma nova transferência...")
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     start_udp_client()
