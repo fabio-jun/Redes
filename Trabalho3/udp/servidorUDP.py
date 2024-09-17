@@ -28,7 +28,7 @@ def start_udp_server():
 
         while True:
             # FASE 1: Receber pacotes do cliente por 20 segundos
-            print("Aguardando dados...")
+            print("Aguardando dados...\n")
             total_bytes_received = 0
             total_packets_received = 0
             start_time = time.time()
@@ -54,7 +54,7 @@ def start_udp_server():
             print(f"Taxa de Download:\n{format_all_speeds(upload_bps)}")
             print(f"Pacotes por segundo: {upload_pps:,.2f}")
             print(f"Pacotes recebidos: {total_packets_received:,}")
-            print(f"Bytes recebidos: {total_bytes_received:,} bytes")
+            print(f"Bytes recebidos: {total_bytes_received:,} bytes\n")
 
             # FASE 2: Enviar pacotes de volta ao cliente por 20 segundos (Download para o cliente)
             try:
@@ -72,16 +72,16 @@ def start_udp_server():
 
                 # Calcular tempo e taxa de download (do ponto de vista do servidor, é upload)
                 download_time = end_time - start_time
-                print(f"Tempo de Upload (envio): {download_time} segundos")
+                print(f"Tempo de Upload: {download_time} segundos")
                 download_bps = (total_bytes_sent * 8) / download_time  # bits por segundo
                 download_pps = total_packets_sent / download_time  # pacotes por segundo
                 print(f"Taxa de Upload:\n{format_all_speeds(download_bps)}")
                 print(f"Pacotes por segundo: {download_pps:,.2f}")
                 print(f"Pacotes enviados: {total_packets_sent:,}")
-                print(f"Bytes enviados: {total_bytes_sent:,} bytes")
+                print(f"Bytes enviados: {total_bytes_sent:,} bytes\n")
 
             except socket.error as e:
-                print(f"Erro ao enviar dados para o cliente: {e}")
+                print(f"Erro ao enviar dados para o cliente: {e}\n")
 
 if __name__ == "__main__":
     start_udp_server()
