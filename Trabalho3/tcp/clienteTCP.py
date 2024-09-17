@@ -50,7 +50,7 @@ def start_tcp_client():
             print(f"Taxa de Upload:\n{format_all_speeds(upload_bps)}")
             print(f"Pacotes por segundo: {upload_pps:,.2f}")
             print(f"Pacotes enviados: {packet_count:,}")
-            print(f"Bytes enviados: {total_bytes_sent:,} bytes")
+            print(f"Bytes enviados: {total_bytes_sent:,} bytes\n")
 
             # Enviar uma notificação ao servidor indicando que o upload terminou
             s.sendall(b'UPLOAD_COMPLETE')

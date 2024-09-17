@@ -24,7 +24,7 @@ def generate_test_string():
 def handle_client(conn):
     """Função para lidar com a conexão de um cliente"""
     with conn:
-        print(f"Conectado a {conn.getpeername()}")
+        print(f"Conectado a {conn.getpeername()}\n")
 
         # FASE 1: Receber múltiplos pacotes do cliente (esperando 1 MB, 2000 pacotes)
         start_time = time.time()
@@ -32,8 +32,8 @@ def handle_client(conn):
         packet_count = 0
         while True:
             data = conn.recv(500)  # Recebe 500 bytes por vez
-            if b'UPLOAD_COMPLETE' in data:
-                print("Upload completo")
+            if b'UPLOAD_COMPLETE' in data: # Mensagem enviada pelo cliente dizendo que o upload acabou
+                print("Download completo")
                 break
             if not data:
                 break
@@ -42,13 +42,9 @@ def handle_client(conn):
         end_time = time.time()
 
         upload_time = end_time - start_time
-        print(f"Tempo de upload: {upload_time} segundos")
-        if upload_time == 0:
-            upload_time = 1e-9  # Prevenir divisão por zero
-
         upload_bps = (data_received * 8) / upload_time  # bits por segundo
         upload_pps = packet_count / upload_time  # pacotes por segundo
-        print(f"Taxa de Upload:\n{format_all_speeds(upload_bps)}")
+        print(f"Taxa de Download:{format_all_speeds(upload_bps)}")
         print(f"Pacotes por segundo: {upload_pps:,.2f}")
         print(f"Pacotes recebidos: {packet_count:,}")
         print(f"Bytes recebidos: {data_received:,} bytes")
@@ -73,18 +69,18 @@ def handle_client(conn):
             end_time = time.time()
 
             download_time = end_time - start_time
-            print(f"Tempo de download: {download_time} segundos")
+            print(f"Tempo de upload: {download_time} segundos\n")
             if download_time == 0:
                 download_time = 1e-9  # Prevenir divisão por zero
 
             download_bps = (total_bytes_sent * 8) / download_time  # bits por segundo
             download_pps = packet_count / download_time  # pacotes por segundo
-            print(f"Taxa de Download:\n{format_all_speeds(download_bps)}")
+            print(f"Taxa de Upload:{format_all_speeds(download_bps)}")
             print(f"Pacotes por segundo: {download_pps:,.2f}")
             print(f"Pacotes enviados: {packet_count:,}")
             print(f"Bytes enviados: {total_bytes_sent:,} bytes")
         except socket.error as e:
-            print(f"Erro ao enviar dados para o cliente: {e}")
+            print(f"Erro ao enviar dados para o cliente: {e}\n")
 
 def start_tcp_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
