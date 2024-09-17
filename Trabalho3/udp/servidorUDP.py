@@ -48,7 +48,7 @@ def start_udp_server():
 
             # Calcular tempo e taxa de upload (do ponto de vista do servidor, é download)
             upload_time = end_time - start_time
-            print(f"Tempo de Download (recepção): {upload_time} segundos")
+            print(f"Tempo de Download: {upload_time} segundos")
             upload_bps = (total_bytes_received * 8) / upload_time  # bits por segundo
             upload_pps = total_packets_received / upload_time  # pacotes por segundo
             print(f"Taxa de Download:\n{format_all_speeds(upload_bps)}")
