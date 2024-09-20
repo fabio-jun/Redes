@@ -2,7 +2,7 @@ import socket
 import time
 
 # Configurações do cliente
-HOST = '191.52.78.213'  # Endereço IP do servidor
+HOST = '192.168.15.61'  # Endereço IP do servidor
 PORT = 65432            # Porta do servidor
 
 def format_all_speeds(bps):
@@ -17,7 +17,7 @@ def format_all_speeds(bps):
     )
 
 def generate_test_string():
-    base_string = "teste de rede *2024*"
+    base_string = "teste de rede 2024"
     repeated_string = (base_string * (500 // len(base_string)))[:500]
     return repeated_string.encode('utf-8')  # Converter para bytes
 
@@ -28,16 +28,17 @@ def start_tcp_client():
             print(f"Conectado ao servidor {HOST}:{PORT}")
 
             # FASE 1: Enviar múltiplos pacotes de 500 bytes por 20 segundos (UPLOAD)
-            data_to_send = generate_test_string() * 2000
+            data_to_send = generate_test_string()  # String de 500 bytes
             packet_size = 500
             total_bytes_sent = 0
             packet_count = 0
             start_time = time.time()
-            while time.time() - start_time < 20:  # Loop de upload por 20 segundos
-                for i in range(0, len(data_to_send), packet_size):
-                    s.sendall(data_to_send[i:i+packet_size])
-                    total_bytes_sent += packet_size
-                    packet_count += 1
+
+            # Limitar o upload a 20 segundos
+            while time.time() - start_time < 20:
+                s.sendall(data_to_send)
+                total_bytes_sent += packet_size
+                packet_count += 1
             end_time = time.time()
 
             upload_time = end_time - start_time
@@ -59,7 +60,9 @@ def start_tcp_client():
             total_bytes_received = 0
             packet_count = 0
             start_time = time.time()
-            while time.time() - start_time < 20:  # Loop de download por 20 segundos
+
+            # Limitar o download a 20 segundos
+            while time.time() - start_time < 20:
                 data = s.recv(packet_size)
                 if not data:
                     break
@@ -79,8 +82,13 @@ def start_tcp_client():
             print(f"Pacotes recebidos: {packet_count:,}")
             print(f"Bytes recebidos: {total_bytes_received:,} bytes")
 
-            # Aguardar antes de realizar nova transferência
-            input("Pressione Enter para realizar uma nova transferência...")
+            # Aguardar confirmação do servidor de que o upload foi concluído
+            confirmation = s.recv(1024)
+            if confirmation == b'UPLOAD_COMPLETE':
+                print("Upload finalizado pelo servidor. Encerrando a conexão.")
 
-if __name__ == "__main__":
+            # Agora o cliente pode encerrar a conexão de forma segura
+            break  # Finaliza após uma transferência
+
+if __name__ == "_main_":
     start_tcp_client()

@@ -3,7 +3,7 @@ import time
 
 # Configurações do servidor
 HOST = '0.0.0.0'  # Endereço IP do servidor
-PORT = 65432      # Porta do servidor
+PORT = 5000    # Porta do servidor
 
 def format_all_speeds(bps):
     gbps = bps / 10**9
