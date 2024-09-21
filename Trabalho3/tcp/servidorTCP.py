@@ -1,9 +1,8 @@
 import socket
 import time
 
-# Configurações do servidor
-HOST = '0.0.0.0'  # Endereço IP do servidor
-PORT = 65430      # Porta do servidor
+HOST = '0.0.0.0'  
+PORT = 65430 
 
 def format_all_speeds(bps):
     gbps = bps / 10**9
@@ -22,17 +21,15 @@ def generate_test_string():
     return repeated_string.encode('utf-8')  # Converter para bytes
 
 def handle_client(conn):
-    """Função para lidar com a conexão de um cliente"""
     with conn:
         print(f"Conectado a {conn.getpeername()}\n")
 
-        # FASE 1: Receber múltiplos pacotes do cliente (esperando pacotes por 20 segundos)
         start_time = time.time()
         data_received = 0
         packet_count = 0
         while True:
             data = conn.recv(500)  # Recebe 500 bytes por vez
-            if b'UPLOAD_COMPLETE' in data:  # Mensagem enviada pelo cliente dizendo que o upload acabou
+            if b'UPLOAD_COMPLETE' in data:
                 break
             if not data:
                 break
@@ -40,16 +37,16 @@ def handle_client(conn):
             packet_count += 1
         end_time = time.time()
 
-        upload_time = end_time - start_time  # Tempo para receber dados do cliente
-        upload_bps = (data_received * 8) / upload_time  # bits por segundo
-        upload_pps = packet_count / upload_time  # pacotes por segundo
+        upload_time = end_time - start_time 
+        upload_bps = (data_received * 8) / upload_time
+        upload_pps = packet_count / upload_time 
         print(f"Tempo de download: {upload_time} segundos")
         print(f"Taxa de Download:{format_all_speeds(upload_bps)}")
         print(f"Pacotes por segundo: {upload_pps:,.2f}")
         print(f"Pacotes recebidos: {packet_count:,}")
         print(f"Bytes recebidos: {data_received:,} bytes\n")
 
-        # FASE 2: Enviar dados ao cliente (fase de download)
+        # FASE 2: Enviar dados ao cliente
         try:
             data_to_send = generate_test_string()  # String de 500 bytes
             packet_size = 500
@@ -57,7 +54,6 @@ def handle_client(conn):
             packet_count = 0
             start_time = time.time()
 
-            # Limitar a transferência para 20 segundos
             while time.time() - start_time < 20:
                 try:
                     conn.sendall(data_to_send)
@@ -68,19 +64,18 @@ def handle_client(conn):
                     break
             end_time = time.time()
 
-            download_time = end_time - start_time  # Tempo para enviar dados ao cliente
+            download_time = end_time - start_time 
             print(f"Tempo de upload: {download_time} segundos")
             if download_time == 0:
                 download_time = 1e-9  # Prevenir divisão por zero
 
             download_bps = (total_bytes_sent * 8) / download_time  # bits por segundo   
-            download_pps = packet_count / download_time  # pacotes por segundo
+            download_pps = packet_count / download_time 
             print(f"Taxa de Upload:\n{format_all_speeds(download_bps)}")
             print(f"Pacotes por segundo: {download_pps:,.2f}")
             print(f"Pacotes enviados: {packet_count:,}")
             print(f"Bytes enviados: {total_bytes_sent:,} bytes")
 
-            # Tentar enviar confirmação para o cliente que o upload foi concluído
             try:
                 conn.sendall(b'UPLOAD_COMPLETE')
             except socket.error:
@@ -98,9 +93,9 @@ def start_tcp_server():
         print(f"Servidor ouvindo na porta {PORT}...")
 
         while True:
-            conn, addr = s.accept()  # Aceitar conexões indefinidamente
+            conn, addr = s.accept() 
             print(f"Nova conexão de {addr}")
-            handle_client(conn)  # Lida com a conexão do cliente
+            handle_client(conn) 
 
 if __name__ == "__main__":
     start_tcp_server()

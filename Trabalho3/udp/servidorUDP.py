@@ -1,9 +1,8 @@
 import socket
 import time
 
-# Configurações do servidor
-HOST = '0.0.0.0'  # Endereço IP do servidor
-PORT = 5000    # Porta do servidor
+HOST = '0.0.0.0'
+PORT = 65432 
 
 def format_all_speeds(bps):
     gbps = bps / 10**9
@@ -36,7 +35,7 @@ def start_udp_server():
             start_time = time.time()
             client_addr = None
 
-            while True:  # Receber pacotes até a mensagem 'UPLOAD_COMPLETE'
+            while True:
                 data, addr = s.recvfrom(500)  # Recebe 500 bytes por vez
                 client_addr = addr
                 if b'UPLOAD_COMPLETE' in data:
@@ -49,7 +48,7 @@ def start_udp_server():
 
             end_time = time.time()
 
-            # Calcular tempo e taxa de upload (do ponto de vista do servidor, é download)
+            # Calcular tempo e taxa de download
             upload_time = end_time - start_time
             print(f"Tempo de Download: {upload_time} segundos")
             upload_bps = (total_bytes_received * 8) / upload_time  # bits por segundo
@@ -60,11 +59,11 @@ def start_udp_server():
             print(f"Bytes recebidos: {total_bytes_received:,} bytes")
 
             # Calcular pacotes perdidos 
-            if total_packets_sent > 0:  # Verifica se recebeu o total de pacotes enviados
+            if total_packets_sent > 0:
                 lost_packets = total_packets_sent - total_packets_received
                 print(f"Pacotes perdidos no download: {lost_packets}\n")
 
-            # FASE 2: Enviar pacotes de volta ao cliente por 20 segundos (Download para o cliente)
+            # FASE 2: Enviar pacotes de volta ao cliente por 20 segundos
             try:
                 data_to_send = generate_test_string()
                 total_bytes_sent = 0
@@ -78,14 +77,13 @@ def start_udp_server():
 
                 end_time = time.time()
 
-                # **Enviar uma mensagem especial para indicar o fim dos dados**
                 s.sendto(b'END_OF_DATA', client_addr)
 
                 # **Enviar ao cliente o número total de pacotes enviados após terminar o envio dos pacotes de dados**
                 total_packets_sent_message = str(total_packets_sent_to_client).encode('utf-8')
                 s.sendto(total_packets_sent_message, client_addr)
 
-                # Calcular tempo e taxa de download (do ponto de vista do servidor, é upload)
+                # Calcular tempo e taxa de upload
                 download_time = end_time - start_time
                 print(f"Tempo de Upload: {download_time} segundos")
                 download_bps = (total_bytes_sent * 8) / download_time  # bits por segundo

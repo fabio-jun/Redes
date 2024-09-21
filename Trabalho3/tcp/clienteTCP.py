@@ -1,9 +1,8 @@
 import socket
 import time
 
-# Configurações do cliente
-HOST = '192.168.15.61'  # Endereço IP do servidor
-PORT = 65432            # Porta do servidor
+HOST = '192.168.15.61'  
+PORT = 65432            
 
 def format_all_speeds(bps):
     gbps = bps / 10**9
@@ -17,18 +16,18 @@ def format_all_speeds(bps):
     )
 
 def generate_test_string():
-    base_string = "teste de rede 2024"
+    base_string = "teste de rede *2024*"
     repeated_string = (base_string * (500 // len(base_string)))[:500]
     return repeated_string.encode('utf-8')  # Converter para bytes
 
 def start_tcp_client():
-    while True:  # Manter o cliente em execução para realizar múltiplas transferências
+    while True:  
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((HOST, PORT))
             print(f"Conectado ao servidor {HOST}:{PORT}")
 
-            # FASE 1: Enviar múltiplos pacotes de 500 bytes por 20 segundos (UPLOAD)
-            data_to_send = generate_test_string()  # String de 500 bytes
+            # FASE 1: Enviar múltiplos pacotes de 500 bytes por 20 segundos 
+            data_to_send = generate_test_string() 
             packet_size = 500
             total_bytes_sent = 0
             packet_count = 0
@@ -53,10 +52,9 @@ def start_tcp_client():
             print(f"Pacotes enviados: {packet_count:,}")
             print(f"Bytes enviados: {total_bytes_sent:,} bytes\n")
 
-            # Enviar uma notificação ao servidor indicando que o upload terminou
             s.sendall(b'UPLOAD_COMPLETE')
 
-            # FASE 2: Receber os dados por 20 segundos (DOWNLOAD)
+            # FASE 2: Receber os dados por 20 segundos 
             total_bytes_received = 0
             packet_count = 0
             start_time = time.time()
@@ -82,13 +80,10 @@ def start_tcp_client():
             print(f"Pacotes recebidos: {packet_count:,}")
             print(f"Bytes recebidos: {total_bytes_received:,} bytes")
 
-            # Aguardar confirmação do servidor de que o upload foi concluído
             confirmation = s.recv(1024)
             if confirmation == b'UPLOAD_COMPLETE':
                 print("Upload finalizado pelo servidor. Encerrando a conexão.")
-
-            # Agora o cliente pode encerrar a conexão de forma segura
-            break  # Finaliza após uma transferência
+            break 
 
 if __name__ == "_main_":
     start_tcp_client()
