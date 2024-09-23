@@ -31,13 +31,18 @@ def start_tcp_client():
             packet_size = 500
             total_bytes_sent = 0
             packet_count = 0
+            lost_packets = 0
             start_time = time.time()
 
             # Limitar o upload a 20 segundos
             while time.time() - start_time < 20:
-                s.sendall(data_to_send)
-                total_bytes_sent += packet_size
-                packet_count += 1
+                try:
+                    s.sendall(data_to_send)
+                    total_bytes_sent += packet_size
+                    packet_count += 1
+                except socket.error:
+                    lost_packets += 1
+
             end_time = time.time()
 
             upload_time = end_time - start_time
@@ -50,22 +55,29 @@ def start_tcp_client():
             print(f"Taxa de Upload:\n{format_all_speeds(upload_bps)}")
             print(f"Pacotes por segundo: {upload_pps:,.2f}")
             print(f"Pacotes enviados: {packet_count:,}")
-            print(f"Bytes enviados: {total_bytes_sent:,} bytes\n")
+            print(f"Bytes enviados: {total_bytes_sent:,} bytes")
+            print(f"Pacotes perdidos no upload: {lost_packets:,}\n")
 
             s.sendall(b'UPLOAD_COMPLETE')
 
             # FASE 2: Receber os dados por 20 segundos 
             total_bytes_received = 0
             packet_count = 0
+            lost_packets = 0
             start_time = time.time()
 
             # Limitar o download a 20 segundos
             while time.time() - start_time < 20:
-                data = s.recv(packet_size)
-                if not data:
-                    break
-                total_bytes_received += len(data)
-                packet_count += 1
+                try:
+                    data = s.recv(packet_size)
+                    if not data:
+                        lost_packets += 1
+                        continue
+                    total_bytes_received += len(data)
+                    packet_count += 1
+                except socket.error:
+                    lost_packets += 1
+
             end_time = time.time()
 
             download_time = end_time - start_time
@@ -79,6 +91,7 @@ def start_tcp_client():
             print(f"Pacotes por segundo: {download_pps:,.2f}")
             print(f"Pacotes recebidos: {packet_count:,}")
             print(f"Bytes recebidos: {total_bytes_received:,} bytes")
+            print(f"Pacotes perdidos no download: {lost_packets:,}")
 
             confirmation = s.recv(1024)
             if confirmation == b'UPLOAD_COMPLETE':

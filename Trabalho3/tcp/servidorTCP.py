@@ -24,27 +24,35 @@ def handle_client(conn):
     with conn:
         print(f"Conectado a {conn.getpeername()}\n")
 
+        # FASE 1: Receber dados do cliente
         start_time = time.time()
         data_received = 0
         packet_count = 0
+        lost_packets = 0
         while True:
-            data = conn.recv(500)  # Recebe 500 bytes por vez
-            if b'UPLOAD_COMPLETE' in data:
+            try:
+                data = conn.recv(500)  # Recebe 500 bytes por vez
+                if b'UPLOAD_COMPLETE' in data:
+                    break
+                if not data:
+                    lost_packets += 1
+                    continue
+                data_received += len(data)
+                packet_count += 1
+            except socket.error:
+                lost_packets += 1
                 break
-            if not data:
-                break
-            data_received += len(data)
-            packet_count += 1
         end_time = time.time()
 
         upload_time = end_time - start_time 
         upload_bps = (data_received * 8) / upload_time
         upload_pps = packet_count / upload_time 
-        print(f"Tempo de download: {upload_time} segundos")
-        print(f"Taxa de Download:{format_all_speeds(upload_bps)}")
+        print(f"Tempo de download (do cliente): {upload_time} segundos")
+        print(f"Taxa de Download (do cliente): {format_all_speeds(upload_bps)}")
         print(f"Pacotes por segundo: {upload_pps:,.2f}")
         print(f"Pacotes recebidos: {packet_count:,}")
-        print(f"Bytes recebidos: {data_received:,} bytes\n")
+        print(f"Bytes recebidos: {data_received:,} bytes")
+        print(f"Pacotes perdidos no download (do cliente): {lost_packets:,}\n")
 
         # FASE 2: Enviar dados ao cliente
         try:
@@ -52,6 +60,7 @@ def handle_client(conn):
             packet_size = 500
             total_bytes_sent = 0
             packet_count = 0
+            lost_packets = 0
             start_time = time.time()
 
             while time.time() - start_time < 20:
@@ -59,22 +68,23 @@ def handle_client(conn):
                     conn.sendall(data_to_send)
                     total_bytes_sent += packet_size
                     packet_count += 1
-                except socket.error as e:
-                    print(f"Upload concluido")
+                except socket.error:
+                    lost_packets += 1
                     break
             end_time = time.time()
 
             download_time = end_time - start_time 
-            print(f"Tempo de upload: {download_time} segundos")
+            print(f"Tempo de upload (para o cliente): {download_time} segundos")
             if download_time == 0:
                 download_time = 1e-9  # Prevenir divisão por zero
 
             download_bps = (total_bytes_sent * 8) / download_time  # bits por segundo   
             download_pps = packet_count / download_time 
-            print(f"Taxa de Upload:\n{format_all_speeds(download_bps)}")
+            print(f"Taxa de Upload (para o cliente):\n{format_all_speeds(download_bps)}")
             print(f"Pacotes por segundo: {download_pps:,.2f}")
             print(f"Pacotes enviados: {packet_count:,}")
             print(f"Bytes enviados: {total_bytes_sent:,} bytes")
+            print(f"Pacotes perdidos no upload (para o cliente): {lost_packets:,}")
 
             try:
                 conn.sendall(b'UPLOAD_COMPLETE')
