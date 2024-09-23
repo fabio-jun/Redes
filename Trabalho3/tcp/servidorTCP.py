@@ -47,12 +47,12 @@ def handle_client(conn):
         upload_time = end_time - start_time 
         upload_bps = (data_received * 8) / upload_time
         upload_pps = packet_count / upload_time 
-        print(f"Tempo de download (do cliente): {upload_time} segundos")
-        print(f"Taxa de Download (do cliente): {format_all_speeds(upload_bps)}")
+        print(f"Tempo de download: {upload_time} segundos")
+        print(f"Taxa de Download: {format_all_speeds(upload_bps)}")
         print(f"Pacotes por segundo: {upload_pps:,.2f}")
         print(f"Pacotes recebidos: {packet_count:,}")
         print(f"Bytes recebidos: {data_received:,} bytes")
-        print(f"Pacotes perdidos no download (do cliente): {lost_packets:,}\n")
+        print(f"Pacotes perdidos no download: {lost_packets:,}\n")
 
         # FASE 2: Enviar dados ao cliente
         try:
@@ -74,7 +74,7 @@ def handle_client(conn):
             end_time = time.time()
 
             download_time = end_time - start_time 
-            print(f"Tempo de upload (para o cliente): {download_time} segundos")
+            print(f"Tempo de upload: {download_time} segundos")
             if download_time == 0:
                 download_time = 1e-9  # Prevenir divisão por zero
 
@@ -84,7 +84,7 @@ def handle_client(conn):
             print(f"Pacotes por segundo: {download_pps:,.2f}")
             print(f"Pacotes enviados: {packet_count:,}")
             print(f"Bytes enviados: {total_bytes_sent:,} bytes")
-            print(f"Pacotes perdidos no upload (para o cliente): {lost_packets:,}")
+            print(f"Pacotes perdidos: {lost_packets:,}")
 
             try:
                 conn.sendall(b'UPLOAD_COMPLETE')
