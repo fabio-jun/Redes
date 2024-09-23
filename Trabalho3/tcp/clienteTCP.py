@@ -1,7 +1,7 @@
 import socket
 import time
 
-HOST = '192.168.15.61'  
+HOST = '192.168.0.120'  
 PORT = 5000            
 
 def format_all_speeds(bps):
