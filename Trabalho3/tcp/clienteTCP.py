@@ -2,7 +2,7 @@ import socket
 import time
 
 HOST = '192.168.15.61'  
-PORT = 65432            
+PORT = 5000            
 
 def format_all_speeds(bps):
     gbps = bps / 10**9
@@ -85,5 +85,5 @@ def start_tcp_client():
                 print("Upload finalizado pelo servidor. Encerrando a conexão.")
             break 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     start_tcp_client()

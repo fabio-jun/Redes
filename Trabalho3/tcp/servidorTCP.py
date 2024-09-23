@@ -2,7 +2,7 @@ import socket
 import time
 
 HOST = '0.0.0.0'  
-PORT = 65430 
+PORT = 5000
 
 def format_all_speeds(bps):
     gbps = bps / 10**9
